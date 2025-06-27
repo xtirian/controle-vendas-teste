@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Controle de Vendas</title>
+  <style>
+      .hidden {
+          display: none !important;
+        }
+        
+        .btn-config {
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 12px 20px;
+            margin: 10px 10px 0 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, background-color 0.3s ease;
+          }
+        
+          .btn-config:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+          }
+        
+          #toggle-config {
+            background: linear-gradient(135deg, #8A2BE2, #6A1B9A);
+          }
+        
+          #toggle-venda {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+          }
+</style>
+</head>
+<body>
+  <h1>Controle de Vendas - Frangos Assados</h1>
+    <div style="display: flex; margin-bottom: 20px;">
+        <button id="toggle-config" class="btn-config">Configurar Estoque</button>
+        <button id="toggle-venda" class="btn-config">Registrar Venda</button>
+    </div>
+    <config-estoque class="hidden"></config-estoque>
+    
+    <estoque-view></estoque-view>
+    <venda-form class="hidden"></venda-form>
+    
+    <venda-history></venda-history>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
