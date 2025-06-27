@@ -187,7 +187,7 @@ class VendaForm extends HTMLElement {
       endereco: this.shadowRoot.getElementById('endereco-encomenda').value,
       modalidade: 'Encomenda',
       pago: this.shadowRoot.getElementById('pago-encomenda').value === 'true',
-      data: new Date().toISOString()
+      data: new Date().toISOString().split('T')[0]
     };
 
     try {
@@ -218,7 +218,7 @@ class VendaForm extends HTMLElement {
       endereco: '',
       modalidade: 'Retirada',
       pago: true,
-      data: new Date().toISOString()
+      data: new Date().toISOString().split('T')[0]
     };
 
     try {

@@ -58,33 +58,33 @@ class ConfigEstoque extends HTMLElement {
         <div class="config-inputs">
           <div>
             <label for="max-tradicional">Máx. Tradicional:</label>
-            <input type="number" id="max-tradicional" min="1" max="80" />
+            <input type="number" id="max-tradicional" min="1" />
           </div>
           <div>
             <label for="inicial-tradicional">Inicial Tradicional:</label>
-            <input type="number" id="inicial-tradicional" min="0" max="80" />
+            <input type="number" id="inicial-tradicional" min="0" />
           </div>
         </div>
 
         <div class="config-inputs">
           <div>
             <label for="max-defumado">Máx. Defumado:</label>
-            <input type="number" id="max-defumado" min="1" max="80" />
+            <input type="number" id="max-defumado" min="1" />
           </div>
           <div>
             <label for="inicial-defumado">Inicial Defumado:</label>
-            <input type="number" id="inicial-defumado" min="0" max="80" />
+            <input type="number" id="inicial-defumado" min="0" />
           </div>
         </div>
 
         <div class="config-inputs">
           <div>
             <label for="max-recheado">Máx. Recheado:</label>
-            <input type="number" id="max-recheado" min="1" max="80" />
+            <input type="number" id="max-recheado" min="1" />
           </div>
           <div>
             <label for="inicial-recheado">Inicial Recheado:</label>
-            <input type="number" id="inicial-recheado" min="0" max="80" />
+            <input type="number" id="inicial-recheado" min="0" />
           </div>
         </div>
 
