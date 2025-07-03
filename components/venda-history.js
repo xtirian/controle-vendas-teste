@@ -174,11 +174,16 @@ class VendaHistory extends HTMLElement {
                       <button class="btn-excluir" data-key="${key}">Excluir</button>
                     `
                 )
-              : `
-                  <button class="btn-entregar" data-key="${key}">Marcar Entrega</button>
-                  <button class="btn-pagar" data-key="${key}">Marcar como Pago</button>
-                  <button class="btn-excluir" data-key="${key}">Excluir</button>
-                `
+              : (
+                  venda.entregue
+                    ? `<button class="btn-pagar" data-key="${key}">Marcar como Pago</button>
+                        <button class="btn-excluir" data-key="${key}">Excluir</button>`
+                    : `
+                        <button class="btn-entregar" data-key="${key}">Marcar Entrega</button>
+                        <button class="btn-pagar" data-key="${key}">Marcar como Pago</button>
+                        <button class="btn-excluir" data-key="${key}">Excluir</button>
+                      `
+                )
             }
           </td>
         `;
