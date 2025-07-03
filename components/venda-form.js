@@ -2,6 +2,9 @@ import { db } from '../firebase-config.js';
 import { ref, push, get, child } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
 class VendaForm extends HTMLElement {
+  loadingEncomenda = false;
+  loadingRetirada = false
+  
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -53,6 +56,23 @@ class VendaForm extends HTMLElement {
         button.submit:hover {
           background-color: #45a049;
         }
+        .spinner {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          border: 2px solid #fff;
+          border-top: 2px solid #4CAF50;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          vertical-align: middle;
+          margin-left: 8px;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
       </style>
 
       <div>
@@ -71,15 +91,15 @@ class VendaForm extends HTMLElement {
         </div>
         <div>
           <label for="nome-encomenda">Nome Completo:</label>
-          <input type="text" id="nome-encomenda" required />
+          <input type="text" id="nome-encomenda" />
         </div>
         <div>
           <label for="telefone-encomenda">Telefone:</label>
-          <input type="tel" id="telefone-encomenda" required />
+          <input type="tel" id="telefone-encomenda" />
         </div>
         <div>
           <label for="endereco-encomenda">Endereço:</label>
-          <input type="text" id="endereco-encomenda" required />
+          <input type="text" id="endereco-encomenda" />
         </div>
         <div>
           <label for="pago-encomenda">Status de Pagamento:</label>
@@ -102,11 +122,11 @@ class VendaForm extends HTMLElement {
         </div>
         <div>
           <label for="nome-retirada">Nome:</label>
-          <input type="text" id="nome-retirada" required />
+          <input type="text" id="nome-retirada" />
         </div>
         <div>
           <label for="sobrenome-retirada">Sobrenome:</label>
-          <input type="text" id="sobrenome-retirada" required />
+          <input type="text" id="sobrenome-retirada" />
         </div>
         <button type="submit" class="submit">Registrar Retirada</button>
       </form>
@@ -171,64 +191,91 @@ class VendaForm extends HTMLElement {
 
   async _handleSubmitEncomenda(event) {
     event.preventDefault();
-
-    const tipo = this.shadowRoot.getElementById('tipo-encomenda').value;
-    const estoqueOk = await this._verificarEstoqueDisponivel(tipo);
-
-    if (!estoqueOk) {
-      alert(`Estoque de ${tipo.toUpperCase()} esgotado!`);
-      return;
-    }
-
-    const venda = {
-      tipo,
-      cliente: this.shadowRoot.getElementById('nome-encomenda').value,
-      contato: this.shadowRoot.getElementById('telefone-encomenda').value,
-      endereco: this.shadowRoot.getElementById('endereco-encomenda').value,
-      modalidade: 'Encomenda',
-      pago: this.shadowRoot.getElementById('pago-encomenda').value === 'true',
-      data: new Date().toISOString().split('T')[0]
-    };
-
+  
+    const submitButton = this.shadowRoot.querySelector('#form-encomenda .submit');
+  
+    // Ativa loading
+    this.loadingEncomenda = true;
+    submitButton.disabled = true;
+    submitButton.innerHTML = 'Registrando <span class="spinner"></span>';
+  
     try {
+      const tipo = this.shadowRoot.getElementById('tipo-encomenda').value;
+      const estoqueOk = await this._verificarEstoqueDisponivel(tipo);
+  
+      if (!estoqueOk) {
+        alert(`Estoque de ${tipo.toUpperCase()} esgotado!`);
+        return;
+      }
+  
+      const venda = {
+        tipo,
+        cliente: this.shadowRoot.getElementById('nome-encomenda').value,
+        contato: this.shadowRoot.getElementById('telefone-encomenda').value,
+        endereco: this.shadowRoot.getElementById('endereco-encomenda').value,
+        modalidade: 'Encomenda',
+        entregue: false ,
+        pago: this.shadowRoot.getElementById('pago-encomenda').value === 'true',
+        data: new Date().toISOString().split('T')[0]
+      };
+  
       await push(ref(db, 'vendas'), venda);
       this.shadowRoot.getElementById('form-encomenda').reset();
       alert('Encomenda registrada com sucesso!');
     } catch (err) {
       alert('Erro ao registrar encomenda: ' + err.message);
+    } finally {
+      // Desativa loading
+      this.loadingEncomenda = false;
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Registrar Encomenda';
     }
   }
 
+
   async _handleSubmitRetirada(event) {
     event.preventDefault();
-
-    const tipo = this.shadowRoot.getElementById('tipo-retirada').value;
-    const estoqueOk = await this._verificarEstoqueDisponivel(tipo);
-
-    if (!estoqueOk) {
-      alert(`Estoque de ${tipo.toUpperCase()} esgotado!`);
-      return;
-    }
-
-    const venda = {
-      tipo,
-      cliente: this.shadowRoot.getElementById('nome-retirada').value + ' ' +
-               this.shadowRoot.getElementById('sobrenome-retirada').value,
-      contato: '',
-      endereco: '',
-      modalidade: 'Retirada',
-      pago: true,
-      data: new Date().toISOString().split('T')[0]
-    };
-
+  
+    if (this.loadingRetirada) return; // impede múltiplos envios
+    this.loadingRetirada = true;
+  
+    const submitButton = this.shadowRoot.querySelector('#form-retirada .submit');
+    submitButton.disabled = true;
+    submitButton.innerHTML = 'Registrando <span class="spinner"></span>';
+  
     try {
+      const tipo = this.shadowRoot.getElementById('tipo-retirada').value;
+      const estoqueOk = await this._verificarEstoqueDisponivel(tipo);
+  
+      if (!estoqueOk) {
+        alert(`Estoque de ${tipo.toUpperCase()} esgotado!`);
+        return;
+      }
+  
+      const venda = {
+        tipo,
+        cliente: this.shadowRoot.getElementById('nome-retirada').value + ' ' +
+                 this.shadowRoot.getElementById('sobrenome-retirada').value,
+        contato: '',
+        endereco: '',
+        modalidade: 'Retirada',
+        entregue: false ,
+        pago: true,
+        data: new Date().toISOString().split('T')[0]
+      };
+  
       await push(ref(db, 'vendas'), venda);
       this.shadowRoot.getElementById('form-retirada').reset();
       alert('Retirada registrada com sucesso!');
     } catch (err) {
       alert('Erro ao registrar retirada: ' + err.message);
+    } finally {
+      this.loadingRetirada = false;
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Registrar Retirada';
     }
   }
+
 }
 
 customElements.define('venda-form', VendaForm);
