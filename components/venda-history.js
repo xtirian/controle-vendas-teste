@@ -39,6 +39,20 @@ class VendaHistory extends HTMLElement {
         th {
           background-color: #f2f2f2;
         }
+        .entregue {
+          background-color: #0A3876;
+          color: white;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+        }
+        .nao_entregue {
+          background-color: #f44336;
+          color: white;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+        }
         .pago {
           background-color: #4CAF50;
           color: white;
@@ -69,6 +83,14 @@ class VendaHistory extends HTMLElement {
           cursor: pointer;
           border-radius: 4px;
         }
+        button.btn-entregar {
+          background-color:#340746;
+          color: white;
+          border: none;
+          padding: 5px 8px;
+          cursor: pointer;
+          border-radius: 4px;
+        }
       </style>
 
       <h2>Histórico de Vendas</h2>
@@ -84,6 +106,7 @@ class VendaHistory extends HTMLElement {
             <th>Contato</th>
             <th>Endereço</th>
             <th>Modalidade</th>
+            <th>Entregue</th>
             <th>Pagamento</th>
             <th>Ações</th>
           </tr>
@@ -132,24 +155,50 @@ class VendaHistory extends HTMLElement {
         const key = childSnapshot.key;
 
         const tr = document.createElement('tr');
+        console.log(venda.entregue)
         tr.innerHTML = `
           <td style="${venda.tipo === 'tradicional' ? 'background-color: #722F37; color:#fff' : venda.tipo === 'defumado' ? 'background-color: #FFD700; color:#333' : 'background-color: #1E90FF; color:#fff'}">${venda.tipo || ''}</td>
           <td>${venda.cliente || ''}</td>
           <td>${venda.contato || ''}</td>
           <td>${venda.endereco || ''}</td>
           <td>${venda.modalidade || ''}</td>
+          <td><span class="${venda.entregue === true ? 'entregue' : 'nao_entregue'}">${venda.entregue ? 'ENTREGUE' : 'NÃO ENTREGUE'}</span></td>
           <td><span class="${venda.pago ? 'pago' : 'receber'}">${venda.pago ? 'PAGO' : 'À RECEBER'}</span></td>
           <td>
             ${venda.pago
-              ? `<button class="btn-excluir" data-key="${key}">Excluir</button>`
-              : `<button class="btn-pagar" data-key="${key}">Marcar como Pago</button>
-                 <button class="btn-excluir" data-key="${key}">Excluir</button>`}
+              ? (
+                  venda.entregue
+                    ? `<button class="btn-excluir" data-key="${key}">Excluir</button>`
+                    : `
+                      <button class="btn-entregar" data-key="${key}">Marcar Entrega</button>
+                      <button class="btn-excluir" data-key="${key}">Excluir</button>
+                    `
+                )
+              : `
+                  <button class="btn-entregar" data-key="${key}">Marcar Entrega</button>
+                  <button class="btn-pagar" data-key="${key}">Marcar como Pago</button>
+                  <button class="btn-excluir" data-key="${key}">Excluir</button>
+                `
+            }
           </td>
         `;
         tbody.appendChild(tr);
       });
 
       // Botões de ação
+      this.shadowRoot.querySelectorAll('button.btn-entregar').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const key = e.target.getAttribute('data-key');
+          if(confirm('Confirma a entregue?')) {
+            try{
+              await update(ref(db, `vendas/${key}`), { entregue: true});
+            } catch (err) {
+              alert ('Erro ao marcar entrega: ' + err.message)
+            }
+          } 
+        })
+      })
+      
       this.shadowRoot.querySelectorAll('button.btn-excluir').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const key = e.target.getAttribute('data-key');
